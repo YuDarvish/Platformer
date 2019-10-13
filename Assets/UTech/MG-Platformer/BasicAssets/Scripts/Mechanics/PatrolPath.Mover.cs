@@ -7,14 +7,9 @@ namespace Platformer.Mechanics
         /// <summary>
         /// The Mover class oscillates between start and end points of a path at a defined speed.
         /// </summary>
-        public class Mover
+        public class mMover : Mover
         {
-            PatrolPath path;
-            float p = 0;
-            float duration;
-            float startTime;
-
-            public Mover(PatrolPath path, float speed)
+            public mMover(PatrolPath path, float speed)
             {
                 this.path = path;
                 this.duration = (path.endPosition - path.startPosition).magnitude / speed;
@@ -25,15 +20,11 @@ namespace Platformer.Mechanics
             /// Get the position of the mover for the current frame.
             /// </summary>
             /// <value></value>
-            public Vector2 Position
+            public override Vector2 Position()
             {
-                get
-                {
-                    p = Mathf.InverseLerp(0, duration, Mathf.PingPong(Time.time - startTime, duration));
-                    Vector2 teste = Vector2.Lerp(path.startPosition, path.endPosition, p);
-                    Vector2 currentPos = path.transform.position;
-                    return path.transform.TransformPoint(teste);
-                }
+                p = Mathf.InverseLerp(0, duration, Mathf.PingPong(Time.time - startTime, duration));
+
+                return path.transform.TransformPoint(Vector2.Lerp(path.StartPosition(), path.EndPosition(), p));
             }
         }
     }
