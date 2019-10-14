@@ -30,7 +30,9 @@ namespace Platformer.Mechanics
                 get
                 {
                     p = Mathf.InverseLerp(0, duration, Mathf.PingPong(Time.time - startTime, duration));
-                    return path.transform.TransformPoint(Vector2.Lerp(path.startPosition, path.endPosition, p));
+                    Vector2 teste = Vector2.Lerp(path.startPosition, path.endPosition, p);
+                    Vector2 currentPos = path.transform.position;
+                    return path.transform.TransformPoint(teste);
                 }
             }
         }

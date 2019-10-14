@@ -1,4 +1,5 @@
 using Platformer.Mechanics;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Platformer.Model
@@ -25,7 +26,7 @@ namespace Platformer.Model
         /// <summary>
         /// The spawn point in the scene.
         /// </summary>
-        public Transform spawnPoint;
+        public List<Transform> spawnPoint;
 
         /// <summary>
         /// A global jump modifier applied to all initial jump velocities.
