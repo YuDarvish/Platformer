@@ -5,6 +5,7 @@ using Platformer.Gameplay;
 using static Platformer.Core.Simulation;
 using Platformer.Model;
 using Platformer.Core;
+using UnityEngine.UI;
 
 namespace Platformer.Mechanics
 {
@@ -42,6 +43,8 @@ namespace Platformer.Mechanics
 
         public Bounds Bounds => collider2d.bounds;
 
+        public Text directionText;
+
         void Awake()
         {
             health = GetComponent<Health>();
@@ -68,6 +71,7 @@ namespace Platformer.Mechanics
             {
                 move.x = 0;
             }
+            GetInputHorizontalAxis();
             UpdateJumpState();
             base.Update();
         }
@@ -136,6 +140,38 @@ namespace Platformer.Mechanics
             Jumping,
             InFlight,
             Landed
+        }
+
+        void GetInputHorizontalAxis()
+        {
+            Vector2 startPos = new Vector2();
+            Vector2 direction = new Vector2();
+            // Track a single touch as a direction control.
+            if (Input.touchCount > 0)
+            {
+                Touch touch = Input.GetTouch(0);
+
+                // Handle finger movements based on TouchPhase
+                switch (touch.phase)
+                {
+                    //When a touch has first been detected, change the message and record the starting position
+                    case TouchPhase.Began:
+                        // Record initial touch position.
+                        startPos = touch.position;
+                        break;
+
+                    //Determine if the touch is a moving touch
+                    case TouchPhase.Moved:
+                        // Determine direction by comparing the current touch position with the initial one
+                        direction = touch.position - startPos;
+                        break;
+
+                    case TouchPhase.Ended:
+                        // Report that the touch has ended when it ends
+                        break;
+                }
+            }
+            directionText.text = direction.normalized.ToString();
         }
     }
 }
