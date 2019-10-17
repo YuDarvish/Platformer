@@ -25,7 +25,15 @@ namespace Platformer.UI
         /// </summary>
         public GameController gameController;
 
+        public PowerUpSpawn powerUpSpawn;
+
         bool showMainCanvas = false;
+
+        private void Awake()
+        {
+            if (PowerUpSpawn.instance == null)
+                Instantiate(powerUpSpawn);
+        }
 
         void OnEnable()
         {
