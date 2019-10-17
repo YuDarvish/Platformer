@@ -45,6 +45,10 @@ namespace Platformer.Mechanics
 
         public Text directionText;
 
+        //Mobile Controls
+        Vector2 startPos;
+        Vector2 direction;
+
         void Awake()
         {
             health = GetComponent<Health>();
@@ -58,10 +62,10 @@ namespace Platformer.Mechanics
         {
             if (controlEnabled)
             {
-                move.x = Input.GetAxis("Horizontal");
-                if (jumpState == JumpState.Grounded && Input.GetButtonDown("Jump"))
+                move.x = GetTouchHorizontalAxis();//Input.GetAxis("Horizontal");
+                if (jumpState == JumpState.Grounded && GetTouchJump()/*Input.GetButtonDown("Jump")*/)
                     jumpState = JumpState.PrepareToJump;
-                else if (Input.GetButtonUp("Jump"))
+                else if (GetTouchJump()/*Input.GetButtonUp("Jump")*/)
                 {
                     stopJump = true;
                     Schedule<PlayerStopJump>().player = this;
@@ -71,7 +75,7 @@ namespace Platformer.Mechanics
             {
                 move.x = 0;
             }
-            GetInputHorizontalAxis();
+            GetTouchHorizontalAxis();
             UpdateJumpState();
             base.Update();
         }
@@ -142,36 +146,47 @@ namespace Platformer.Mechanics
             Landed
         }
 
-        void GetInputHorizontalAxis()
+        float GetTouchHorizontalAxis()
         {
-            Vector2 startPos = new Vector2();
-            Vector2 direction = new Vector2();
-            // Track a single touch as a direction control.
             if (Input.touchCount > 0)
             {
                 Touch touch = Input.GetTouch(0);
 
-                // Handle finger movements based on TouchPhase
-                switch (touch.phase)
+                if(touch.position.x < Screen.height / 2)
                 {
-                    //When a touch has first been detected, change the message and record the starting position
-                    case TouchPhase.Began:
-                        // Record initial touch position.
-                        startPos = touch.position;
-                        break;
+                    switch (touch.phase)
+                    {
+                        case TouchPhase.Began:
+                            startPos = touch.position;
+                            break;
 
-                    //Determine if the touch is a moving touch
-                    case TouchPhase.Moved:
-                        // Determine direction by comparing the current touch position with the initial one
-                        direction = touch.position - startPos;
-                        break;
+                        case TouchPhase.Moved:
+                            direction = touch.position - startPos;
+                            break;
 
-                    case TouchPhase.Ended:
-                        // Report that the touch has ended when it ends
-                        break;
+                        case TouchPhase.Ended:
+                            direction = Vector2.zero;
+                            break;
+                    }
+                }
+                else
+                {
+                    direction = Vector2.zero;
                 }
             }
-            directionText.text = direction.normalized.ToString();
+            return direction.normalized.x;
+        }
+
+        bool GetTouchJump()
+        {
+            foreach (var touch in Input.touches)
+            {
+                if(touch.position.x > Screen.height / 2 && touch.phase == TouchPhase.Began)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
