@@ -34,6 +34,7 @@ namespace Platformer.Mechanics
         /*internal new*/ public AudioSource audioSource;
         public Health health;
         public bool controlEnabled = true;
+        public bool isInvulnerable = false;
 
         bool jump;
         Vector2 move;
@@ -42,8 +43,6 @@ namespace Platformer.Mechanics
         readonly PlatformerModel model = Simulation.GetModel<PlatformerModel>();
 
         public Bounds Bounds => collider2d.bounds;
-
-        public Text directionText;
 
         //Mobile Controls
         Vector2 startPos;
@@ -62,10 +61,10 @@ namespace Platformer.Mechanics
         {
             if (controlEnabled)
             {
-                move.x = GetTouchHorizontalAxis();
-                if (jumpState == JumpState.Grounded && GetTouchJump())
+                move.x = Input.GetAxis("Horizontal");
+                if (jumpState == JumpState.Grounded && Input.GetButtonDown("Jump"))
                     jumpState = JumpState.PrepareToJump;
-                else if (GetTouchJump())
+                else if (Input.GetButtonDown("Jump"))
                 {
                     stopJump = true;
                     Schedule<PlayerStopJump>().player = this;
