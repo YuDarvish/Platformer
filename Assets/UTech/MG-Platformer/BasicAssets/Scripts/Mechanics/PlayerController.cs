@@ -5,6 +5,7 @@ using Platformer.Gameplay;
 using static Platformer.Core.Simulation;
 using Platformer.Model;
 using Platformer.Core;
+using UnityEngine.UI;
 
 namespace Platformer.Mechanics
 {
@@ -42,6 +43,12 @@ namespace Platformer.Mechanics
 
         public Bounds Bounds => collider2d.bounds;
 
+        public Text directionText;
+
+        //Mobile Controls
+        Vector2 startPos;
+        Vector2 direction;
+
         void Awake()
         {
             health = GetComponent<Health>();
@@ -55,10 +62,10 @@ namespace Platformer.Mechanics
         {
             if (controlEnabled)
             {
-                move.x = Input.GetAxis("Horizontal");
-                if (jumpState == JumpState.Grounded && Input.GetButtonDown("Jump"))
+                move.x = GetTouchHorizontalAxis();
+                if (jumpState == JumpState.Grounded && GetTouchJump())
                     jumpState = JumpState.PrepareToJump;
-                else if (Input.GetButtonUp("Jump"))
+                else if (GetTouchJump())
                 {
                     stopJump = true;
                     Schedule<PlayerStopJump>().player = this;
@@ -68,6 +75,7 @@ namespace Platformer.Mechanics
             {
                 move.x = 0;
             }
+            GetTouchHorizontalAxis();
             UpdateJumpState();
             base.Update();
         }
@@ -136,6 +144,49 @@ namespace Platformer.Mechanics
             Jumping,
             InFlight,
             Landed
+        }
+
+        float GetTouchHorizontalAxis()
+        {
+            if (Input.touchCount > 0)
+            {
+                Touch touch = Input.GetTouch(0);
+
+                if(touch.position.x < Screen.height / 2)
+                {
+                    switch (touch.phase)
+                    {
+                        case TouchPhase.Began:
+                            startPos = touch.position;
+                            break;
+
+                        case TouchPhase.Moved:
+                            direction = touch.position - startPos;
+                            break;
+
+                        case TouchPhase.Ended:
+                            direction = Vector2.zero;
+                            break;
+                    }
+                }
+                else
+                {
+                    direction = Vector2.zero;
+                }
+            }
+            return direction.normalized.x;
+        }
+
+        bool GetTouchJump()
+        {
+            foreach (var touch in Input.touches)
+            {
+                if(touch.position.x > Screen.height / 2 && touch.phase == TouchPhase.Began)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
