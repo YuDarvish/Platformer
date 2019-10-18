@@ -1,86 +1,135 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
-public class PowerUpSpawn : MonoBehaviour
+namespace Platformer.Mechanics
 {
-    public static PowerUpSpawn instance = null;
-
-    public int hitCount;
-
-    float timeRate = 1f;
-    float nextTime;
-
-    public static Transform spawnPosition;
-
-    //Stack<PowerUp>...
-
-    private void Awake()
+    public class PowerUpSpawn : MonoBehaviour
     {
-        if (instance == null)
-            instance = this;
-        else if (instance != this)
-            Destroy(gameObject);
+        public static PowerUpSpawn instance = null;
 
-        DontDestroyOnLoad(gameObject);
-    }
+        int hitCount;
 
-    // Update is called once per frame
-    void Update()
-    {
-        CheckTimeLimit();
-    }
+        float timeRate = 1f;
+        float nextTime;
 
-    public void CountingHits(Transform tokenPos)
-    {
-        if (hitCount == 0)
-            nextTime = Time.time;
-            spawnPosition = tokenPos;
-        if ((Time.time - nextTime) < timeRate)
+        static Transform spawnPosition;
+
+        private Stack<PowerUp> superJumpStack = new Stack<PowerUp>();
+        private Stack<PowerUp> speedUpStack = new Stack<PowerUp>();
+        private Stack<PowerUp> extraLifeStack = new Stack<PowerUp>();
+
+        private void Awake()
         {
-            hitCount++;
-            nextTime = Time.time;
+            if (instance == null)
+                instance = this;
+            else if (instance != this)
+                Destroy(gameObject);
+
+            DontDestroyOnLoad(gameObject);
+
+            StorePowerUp("SuperJump", 10);
+            StorePowerUp("SpeedUp", 10);
+            StorePowerUp("ExtraLife", 10);
         }
-    }
-
-    void CheckTimeLimit()
-    {
-        if ((Time.time - nextTime) > timeRate)
+               
+        // Update is called once per frame
+        void Update()
         {
-            switch (hitCount)
+            CheckTimeLimit();
+        }
+
+        public void CountingHits(Transform tokenPos)
+        {
+            if (hitCount == 0)
+                nextTime = Time.time;
+            
+            if ((Time.time - nextTime) < timeRate)
             {
-                case 5:
-                    SpawnStar();
-                    hitCount = 0;
-                    break;
-                case 8:
-                    SpawnSpeedUp();
-                    hitCount = 0;
-                    break;
-                case 10:
+                hitCount++;
+                nextTime = Time.time;
+            }
+            spawnPosition = tokenPos;
+        }
+
+        void CheckTimeLimit()
+        {
+            if ((Time.time - nextTime) > timeRate)
+            {
+                if (hitCount >= 3 && hitCount <= 5)
+                {
                     SpawnSuperJump();
                     hitCount = 0;
-                    break;
-                default:
+                }
+                else if (hitCount >= 6 && hitCount <= 7)
+                {
+                    SpawnSpeedUp();
                     hitCount = 0;
-                    break;
+                }
+                else if (hitCount >= 8)
+                {
+                    SpawnExtraLife();
+                    hitCount = 0;
+                }
+                else
+                {
+                    hitCount = 0;
+                }
             }
         }
-    }
 
-    private void SpawnSuperJump()
-    {
-        Debug.Log("SpawnSuperJump");
-    }
+        private void SpawnSuperJump()
+        {
+            PowerUp newPowerUp = superJumpStack.Pop();
+            SpawnPowerUp(newPowerUp);
+        }
 
-    private void SpawnSpeedUp()
-    {
-        Debug.Log("SpawnSpeedUp");
-    }
+        private void SpawnSpeedUp()
+        {
+            PowerUp newPowerUp = speedUpStack.Pop();
+            SpawnPowerUp(newPowerUp);
+        }
 
-    private void SpawnStar()
-    {
-        Debug.Log("SpawnStar");
+        private void SpawnExtraLife()
+        {
+            PowerUp newPowerUp = extraLifeStack.Pop();
+            SpawnPowerUp(newPowerUp);
+        }
+
+        private void SpawnPowerUp(PowerUp power)
+        {
+            power.gameObject.SetActive(true);
+            power.gameObject.transform.position = spawnPosition.position;
+        }
+
+        private void StorePowerUp(string tag, int amount)
+        {
+            GameObject powerUpPrefab = GameObject.FindGameObjectWithTag(tag);
+            for (int i = 0; i < amount; i++)
+            {
+                GameObject powerUpInstan = Instantiate(powerUpPrefab, transform.position, transform.rotation);
+                powerUpInstan.SetActive(false);
+                PushOnStack(powerUpInstan.GetComponent<PowerUp>());
+            }
+        }
+
+        internal void PushOnStack(PowerUp powerUp)
+        {
+            powerUp.gameObject.SetActive(false);
+            if (powerUp.GetType() == typeof(PowerUpSuperJump))
+            {
+                superJumpStack.Push(powerUp);
+            }
+            else if (powerUp.GetType() == typeof(PowerUpSpeedUp))
+            {
+                speedUpStack.Push(powerUp);
+            }
+            else if(powerUp.GetType() == typeof(PowerUpExtraLife))
+            {
+                extraLifeStack.Push(powerUp);
+            }
+        }
     }
 }

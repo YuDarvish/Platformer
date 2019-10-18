@@ -6,6 +6,7 @@ using static Platformer.Core.Simulation;
 using Platformer.Model;
 using Platformer.Core;
 using UnityEngine.UI;
+using System;
 
 namespace Platformer.Mechanics
 {
@@ -27,6 +28,7 @@ namespace Platformer.Mechanics
         /// Initial jump velocity at the start of a jump.
         /// </summary>
         public float jumpTakeOffSpeed = 7;
+        public bool hasExtraLife = false;
 
         public JumpState jumpState = JumpState.Grounded;
         private bool stopJump;
@@ -61,10 +63,10 @@ namespace Platformer.Mechanics
         {
             if (controlEnabled)
             {
-                move.x = Input.GetAxis("Horizontal");
-                if (jumpState == JumpState.Grounded && Input.GetButtonDown("Jump"))
+                move.x = GetTouchHorizontalAxis();
+                if (jumpState == JumpState.Grounded && GetTouchJump())
                     jumpState = JumpState.PrepareToJump;
-                else if (Input.GetButtonDown("Jump"))
+                else if (GetTouchJump())
                 {
                     stopJump = true;
                     Schedule<PlayerStopJump>().player = this;
@@ -186,6 +188,21 @@ namespace Platformer.Mechanics
                 }
             }
             return false;
+        }
+
+        internal void IncreaseJump(float jumpTakeOffSpeed)
+        {
+            this.jumpTakeOffSpeed = jumpTakeOffSpeed;
+        }
+
+        internal void IncreaseSpeed(float maxSpeed)
+        {
+            this.maxSpeed = maxSpeed;
+        }
+
+        internal void GiveExtraLife()
+        {
+            hasExtraLife = true;
         }
     }
 }
