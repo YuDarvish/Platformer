@@ -6,6 +6,7 @@ using static Platformer.Core.Simulation;
 using Platformer.Model;
 using Platformer.Core;
 using UnityEngine.UI;
+using System;
 
 namespace Platformer.Mechanics
 {
@@ -27,6 +28,7 @@ namespace Platformer.Mechanics
         /// Initial jump velocity at the start of a jump.
         /// </summary>
         public float jumpTakeOffSpeed = 7;
+        public bool hasExtraLife = false;
 
         public JumpState jumpState = JumpState.Grounded;
         private bool stopJump;
@@ -34,6 +36,7 @@ namespace Platformer.Mechanics
         /*internal new*/ public AudioSource audioSource;
         public Health health;
         public bool controlEnabled = true;
+        public bool isInvulnerable = false;
 
         bool jump;
         Vector2 move;
@@ -42,8 +45,6 @@ namespace Platformer.Mechanics
         readonly PlatformerModel model = Simulation.GetModel<PlatformerModel>();
 
         public Bounds Bounds => collider2d.bounds;
-
-        public Text directionText;
 
         //Mobile Controls
         Vector2 startPos;
@@ -187,6 +188,21 @@ namespace Platformer.Mechanics
                 }
             }
             return false;
+        }
+
+        internal void IncreaseJump(float jumpTakeOffSpeed)
+        {
+            this.jumpTakeOffSpeed = jumpTakeOffSpeed;
+        }
+
+        internal void IncreaseSpeed(float maxSpeed)
+        {
+            this.maxSpeed = maxSpeed;
+        }
+
+        internal void GiveExtraLife()
+        {
+            hasExtraLife = true;
         }
     }
 }
