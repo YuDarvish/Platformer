@@ -11,8 +11,6 @@ namespace Platformer.Mechanics
             public mMover(ChasePath path, float speed)
             {
                 this.path = path;
-                this.duration = (path.endPosition - path.startPosition).magnitude / speed;
-                this.startTime = Time.time;
             }
 
             /// <summary>
@@ -21,7 +19,7 @@ namespace Platformer.Mechanics
             /// <value></value>
             public override Vector2 Position()
             {
-                return path.transform.TransformPoint(path.EndPosition());
+                return path.endPosition;
             }
         }
     }

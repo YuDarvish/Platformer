@@ -9,8 +9,11 @@ namespace Platformer.Mechanics
     {
         void OnTriggerEnter2D(Collider2D other)
         {
-            AffectBehavior(other.GetComponent<PlayerController>());
-            RecycleMe();
+           if(other.tag == "Player")
+            {
+                AffectBehavior(other.GetComponent<PlayerController>());
+                RecycleMe();
+            }
         }
 
         public abstract void AffectBehavior(PlayerController player);
