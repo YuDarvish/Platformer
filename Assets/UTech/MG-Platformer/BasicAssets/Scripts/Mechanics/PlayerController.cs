@@ -5,6 +5,8 @@ using Platformer.Gameplay;
 using static Platformer.Core.Simulation;
 using Platformer.Model;
 using Platformer.Core;
+using UnityEngine.UI;
+using System;
 
 namespace Platformer.Mechanics
 {
@@ -26,6 +28,7 @@ namespace Platformer.Mechanics
         /// Initial jump velocity at the start of a jump.
         /// </summary>
         public float jumpTakeOffSpeed = 7;
+        public bool hasExtraLife = false;
 
         public JumpState jumpState = JumpState.Grounded;
         private bool stopJump;
@@ -33,6 +36,7 @@ namespace Platformer.Mechanics
         /*internal new*/ public AudioSource audioSource;
         public Health health;
         public bool controlEnabled = true;
+        public bool isInvulnerable = false;
 
         bool jump;
         Vector2 move;
@@ -41,6 +45,10 @@ namespace Platformer.Mechanics
         readonly PlatformerModel model = Simulation.GetModel<PlatformerModel>();
 
         public Bounds Bounds => collider2d.bounds;
+
+        //Mobile Controls
+        Vector2 startPos;
+        Vector2 direction;
 
         void Awake()
         {
@@ -55,10 +63,10 @@ namespace Platformer.Mechanics
         {
             if (controlEnabled)
             {
-                move.x = Input.GetAxis("Horizontal");
-                if (jumpState == JumpState.Grounded && Input.GetButtonDown("Jump"))
+                move.x = GetTouchHorizontalAxis();
+                if (jumpState == JumpState.Grounded && GetTouchJump())
                     jumpState = JumpState.PrepareToJump;
-                else if (Input.GetButtonUp("Jump"))
+                else if (GetTouchJump())
                 {
                     stopJump = true;
                     Schedule<PlayerStopJump>().player = this;
@@ -68,6 +76,7 @@ namespace Platformer.Mechanics
             {
                 move.x = 0;
             }
+            GetTouchHorizontalAxis();
             UpdateJumpState();
             base.Update();
         }
@@ -136,6 +145,71 @@ namespace Platformer.Mechanics
             Jumping,
             InFlight,
             Landed
+        }
+
+        float GetTouchHorizontalAxis()
+        {
+            #if UNITY_EDITOR
+                return Input.GetAxis("Horizontal");
+            #endif
+            if (Input.touchCount > 0)
+            {
+                Touch touch = Input.GetTouch(0);
+
+                if(touch.position.x < Screen.height / 2)
+                {
+                    switch (touch.phase)
+                    {
+                        case TouchPhase.Began:
+                            startPos = touch.position;
+                            break;
+
+                        case TouchPhase.Moved:
+                            direction = touch.position - startPos;
+                            break;
+
+                        case TouchPhase.Ended:
+                            direction = Vector2.zero;
+                            break;
+                    }
+                }
+                else
+                {
+                    direction = Vector2.zero;
+                }
+            }
+            return direction.normalized.x;
+        }
+
+        bool GetTouchJump()
+        {
+
+            #if UNITY_EDITOR
+                return Input.GetButtonDown("Jump");
+            #endif
+            foreach (var touch in Input.touches)
+            {
+                if(touch.position.x > Screen.height / 2 && touch.phase == TouchPhase.Began)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        internal void IncreaseJump(float jumpTakeOffSpeed)
+        {
+            this.jumpTakeOffSpeed = jumpTakeOffSpeed;
+        }
+
+        internal void IncreaseSpeed(float maxSpeed)
+        {
+            this.maxSpeed = maxSpeed;
+        }
+
+        internal void GiveExtraLife()
+        {
+            hasExtraLife = true;
         }
     }
 }

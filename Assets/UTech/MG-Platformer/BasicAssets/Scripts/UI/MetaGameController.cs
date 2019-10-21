@@ -1,3 +1,4 @@
+using Platformer.Gameplay;
 using Platformer.Mechanics;
 using Platformer.UI;
 using UnityEngine;
@@ -25,7 +26,15 @@ namespace Platformer.UI
         /// </summary>
         public GameController gameController;
 
+        public PowerUpSpawn powerUpSpawn;
+
         bool showMainCanvas = false;
+
+        private void Awake()
+        {
+            if (PowerUpSpawn.instance == null)
+                Instantiate(powerUpSpawn);
+        }
 
         void OnEnable()
         {
