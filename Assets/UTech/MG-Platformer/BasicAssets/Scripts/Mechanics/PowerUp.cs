@@ -1,7 +1,6 @@
-﻿using Platformer.Mechanics;
-using System.Collections;
-using System.Collections.Generic;
+﻿using Platformer.Gameplay;
 using UnityEngine;
+using static Platformer.Core.Simulation;
 
 namespace Platformer.Mechanics
 {
@@ -10,9 +9,9 @@ namespace Platformer.Mechanics
         void OnTriggerEnter2D(Collider2D other)
         {
            if(other.tag == "Player")
-            {
-                AffectBehavior(other.GetComponent<PlayerController>());
-                RecycleMe();
+           {
+                var ev = Schedule<PlayerLoadPowerUp>();
+                ev.powerUp = this;
             }
         }
 

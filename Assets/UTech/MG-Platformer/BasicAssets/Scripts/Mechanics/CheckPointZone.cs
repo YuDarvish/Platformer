@@ -15,12 +15,18 @@ namespace Platformer.Mechanics
     /// 
     public class CheckPointZone : MonoBehaviour
     {
-        PlatformerModel model = Simulation.GetModel<PlatformerModel>();
+        public AudioClip CheckPointSfx;
+        internal AudioSource _audio;
+
+        private void Awake()
+        {
+            _audio = GetComponent<AudioSource>();
+        }
 
         void OnTriggerEnter2D(Collider2D collider)
         {
-            if(!model.spawnPoint.Contains(transform))
-                model.spawnPoint.Add(transform);
+            var ev = Schedule<PlayerEnteredCheckPointZone>();
+            ev.checkPoint = this;
         }
     }
 }
