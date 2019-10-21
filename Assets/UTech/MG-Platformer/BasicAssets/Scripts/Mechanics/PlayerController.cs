@@ -149,6 +149,9 @@ namespace Platformer.Mechanics
 
         float GetTouchHorizontalAxis()
         {
+            #if UNITY_EDITOR
+                return Input.GetAxis("Horizontal");
+            #endif
             if (Input.touchCount > 0)
             {
                 Touch touch = Input.GetTouch(0);
@@ -180,6 +183,10 @@ namespace Platformer.Mechanics
 
         bool GetTouchJump()
         {
+
+            #if UNITY_EDITOR
+                return Input.GetButtonDown("Jump");
+            #endif
             foreach (var touch in Input.touches)
             {
                 if(touch.position.x > Screen.height / 2 && touch.phase == TouchPhase.Began)
